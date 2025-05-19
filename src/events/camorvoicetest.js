@@ -1,11 +1,13 @@
 const { EmbedBuilder } = require("discord.js");
 
 const allowedList = {
+  // format : GUILD / SERVER ID : CHANNEL ID
   "1294938335323623457": ["1350472732516679710"], // YASS
   "555869449161408533": ["1234171001030574111"], //OM
 };
 
 const allowedLogs = {
+  // format : GUILD / SERVER ID : CHANNEL ID
   "1294938335323623457": "1333048824557600778", // Server-specific logging channels
   "555869449161408533": "677518233032589312", //OM
 };

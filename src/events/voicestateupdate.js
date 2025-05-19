@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
-
 const allowedList = {
+  // format : GUILD / SERVER ID : CHANNEL ID
   "1294938335323623457": ["1294938335323623461"], // YASS
   "1372876206143311932": ["1373864741260230768"], // LR
   "1258009982532583425" : ["1258015727491878923"], //BD
@@ -8,6 +8,7 @@ const allowedList = {
 };
 
 const allowedLogs = {
+  // format : GUILD / SERVER ID : CHANNEL ID
   "1294938335323623457": "1333048824557600778", // Server-specific logging channels
   "1372876206143311932": "1372883955875053568", // LR
   "1258009982532583425": "1347840248297689231", //BD
@@ -51,8 +52,16 @@ module.exports = {
 
       setTimeout(async () => {
         try {
-          if (newState.channel && !newState.selfVideo) {
-            await newState.disconnect().catch(console.error);
+          // Refetch member and voice state to ensure they're still in the channel and haven't enabled video
+          const refreshedMember = await guild.members.fetch(member.id).catch(() => null);
+          const refreshedState = refreshedMember?.voice;
+          if (
+            refreshedState &&
+            refreshedState.channel &&
+            refreshedState.channel.id === newState.channel.id &&
+            !refreshedState.selfVideo
+          ) {
+            await refreshedState.disconnect().catch(console.error);
             await member.send("⚠️ You were removed for not turning on your camera!").catch(console.error);
 
             if (logChannel) {
@@ -64,7 +73,12 @@ module.exports = {
 
               logChannel.send({ embeds: [embed] }).catch(console.error);
             }
-          } else {
+          } else if (
+            refreshedState &&
+            refreshedState.channel &&
+            refreshedState.channel.id === newState.channel.id &&
+            refreshedState.selfVideo
+          ) {
             activeUsers.set(member.id, true);
           }
         } catch (error) {
@@ -79,8 +93,16 @@ module.exports = {
       if (activeUsers.has(member.id)) {
         setTimeout(async () => {
           try {
-            if (!newState.selfVideo) {
-              await newState.disconnect().catch(console.error);
+            // Refetch member and voice state to ensure they're still in the channel and camera is still off
+            const refreshedMember = await guild.members.fetch(member.id).catch(() => null);
+            const refreshedState = refreshedMember?.voice;
+            if (
+              refreshedState &&
+              refreshedState.channel &&
+              refreshedState.channel.id === newState.channel.id &&
+              !refreshedState.selfVideo
+            ) {
+              await refreshedState.disconnect().catch(console.error);
               await member.send("⚠️ You were removed for turning off your camera!").catch(console.error);
 
               if (logChannel) {
